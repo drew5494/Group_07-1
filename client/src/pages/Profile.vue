@@ -5,6 +5,7 @@
     <h3>Username: {{ username }}</h3>
     <h3>Email: {{ email }}</h3>
     <h3>Country: {{ country }}</h3>
+    <input type="file" accept="image/*" @change="uploadImage($event)">
     <b-row no-gutters>
       <b-col md="6">
         <h3>Favorites</h3>
@@ -72,17 +73,14 @@ export default {
   mounted() {
     axios({
       method: 'get',
-      url: 'http://localhost:3000/user/profile',
-      params: {
-        userId: this.$session.get('userId')
-      },
+      url: `http://localhost:3000/users/${this.$session.get('id')}/profile`,
       responseType: 'json'
     })
       .then(res => {
         if (res.data) {
-          this.username = res.data.oneUser.username;
-          this.email = res.data.oneUser.email;
-          this.country = res.data.oneUser.country;
+          this.username = res.data.user.username;
+          this.email = res.data.user.email;
+          this.country = res.data.user.country;
           for (let hist of res.data.history) {
             if (hist != null)
             this.history.push(hist);
@@ -99,6 +97,18 @@ export default {
       .catch
       //this.localmsg = err;
       ();
+  },
+  methods: {
+    uploadImage(event) {
+      let data = new FormData();
+      data.append('name', 'avatar');
+      data.append('avatar', event.target.files[0]);
+
+      axios.post(
+        `http://localhost:3000/users/${this.$session.get('id')}/upload`,
+        data
+      )
+    }
   }
 };
 </script>
